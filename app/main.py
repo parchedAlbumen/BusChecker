@@ -23,7 +23,10 @@ def get_stop(stop_code: str):
     feed = gtfs_realtime_pb2.FeedMessage()
     response = requests.get(f"{BASE_URL}{API_KEY}")
     feed.ParseFromString(response.content)
-    bus.get_arrival(stop_code, feed, STOPS)
+    info = bus.get_arrival(stop_code, feed, STOPS)
+    if info is None: 
+        return {"message": "doesn't exist lol"}
+    else:
+        return info
 
-
-#fix the return here, fix the return json file, continue @ wiring bus into fastAPI
+#next solve the: when is the bus coming problem (current time - predicted time)
