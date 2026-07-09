@@ -2,28 +2,34 @@ from dotenv import load_dotenv
 from fastapi import HTTPException
 import datetime
 import csv
+import math
 
 def get_arrival(stop_code, feed, stops):
-    internal_code = get_internal_id(stop_code, stops)
+    print("=== NEW REQUEST for", stop_code, "===")
+    stop = stops.get(stop_code)
+    internal_code = get_internal_id(stop)
     if internal_code is None:
         raise HTTPException(status_code=404, detail=f"Stop: {stop_code} does not exist")
     
     bus_infos = {
         "stop_code": stop_code,
-        "stop_name": get_stop_name(stop_code, stops),
+        "stop_name": get_stop_name(stop),
+        "date": datetime.datetime.now().astimezone().strftime("%Y-%m-%d"),
         "buses": []
     }
 
     for entity in feed.entity:
         for stop_time in entity.trip_update.stop_time_update:
             if stop_time.stop_id == internal_code:
-                utc_time = datetime.datetime.fromtimestamp(stop_time.arrival.time, tz=datetime.timezone.utc)
+                print(entity.trip_update.trip.trip_id, stop_time.arrival.time)
+                bus_time = datetime.datetime.fromtimestamp(stop_time.arrival.time).astimezone()
+                minutes = round(find_time_diff(bus_time).total_seconds()/60)
+                if minutes >= 50:
+                    continue
                 bus_infos["buses"].append({
-                    "time": utc_time.astimezone(),
-                    "predicted_arrival": find_time_diff(utc_time)
-                    }
-                )
-
+                    "time_12h": bus_time.strftime("%I:%M %p"),
+                    "predicted_arrival": format_minutes(minutes)
+                })
     return bus_infos
 
 def load_stops(filepath):
@@ -37,18 +43,22 @@ def load_stops(filepath):
             }
     return stops
 
-def get_internal_id(stop_code, stops):
-    stop = stops.get(stop_code) #check dictionary if key exist, returns none if not
+def get_internal_id(stop):
     if stop is None:
         return None
     return stop.get("stop_id")
 
-def get_stop_name(stop_code, stops):
-    stop = stops.get(stop_code)
+def get_stop_name(stop):
     if stop is None:
-        return None
+        return "no name"
     return stop.get("stop_name")
 
 def find_time_diff(bus_time):
-    current_time = datetime.datetime.now(datetime.timezone.utc)
-    return (bus_time - current_time)/60
+    current_time = datetime.datetime.now().astimezone()
+    difference = bus_time - current_time
+    return difference
+
+def format_minutes(value): 
+    if (value < 0):
+        return f"{abs(value)} minutes ago..."
+    return f"{value} minutes away!"

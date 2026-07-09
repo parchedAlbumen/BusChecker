@@ -28,5 +28,6 @@ def get_stop(stop_code: str):
         return {"message": "doesn't exist lol"}
     else:
         return info
+    
 
-#next solve the: when is the bus coming problem (current time - predicted time)
+#thing to do next: connect the txt files so that I can plug in the final destination of the bus stop and have more information!
