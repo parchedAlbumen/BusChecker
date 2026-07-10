@@ -9,6 +9,9 @@ import os
 load_dotenv()
 # Static Data
 STOPS = bus.load_stops("./static/stops.txt")
+# ROUTES = bus.load_stops("./static/routes.txt")
+DIRECTIONS = bus.load_directions("./static/directions.txt")
+DIRECTION_NAMES = bus.load_direction_names("./static/direction_names_exceptions.txt")
 BASE_URL = "https://gtfsapi.translink.ca/v3/gtfsrealtime?apikey="
 API_KEY = os.getenv("MY_API_KEY")
 
@@ -23,11 +26,14 @@ def get_stop(stop_code: str):
     feed = gtfs_realtime_pb2.FeedMessage()
     response = requests.get(f"{BASE_URL}{API_KEY}")
     feed.ParseFromString(response.content)
-    info = bus.get_arrival(stop_code, feed, STOPS)
+    info = bus.get_arrival(stop_code, feed, STOPS, DIRECTIONS, DIRECTION_NAMES)
     if info is None: 
         return {"message": "doesn't exist lol"}
     else:
         return info
     
 
-#thing to do next: connect the txt files so that I can plug in the final destination of the bus stop and have more information!
+
+#CLEAN CODE + CONTINUE WITH PROGRESS 
+# figure out schedule relationship
+# figure out caching and rate limiting
