@@ -25,7 +25,6 @@ def get_arrival(stop_code, feed, stops, directions, dict_names):
             if stop_time.schedule_relationship != stop_time.SCHEDULED: #for the specific bus stop
                 continue
             if stop_time.stop_id == internal_code:
-                #testing here
                 route_id = entity.trip_update.trip.route_id
                 direction_id = entity.trip_update.trip.direction_id
                 route_short_name = directions.get((route_id, str(direction_id)))

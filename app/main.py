@@ -37,7 +37,12 @@ def get_stop(stop_code: str, req: Request):
         raise HTTPException(status_code=429, detail=f"Error 429, Too many Request")
 
     if not (is_ttl_good(cached_time)):
-        response = requests.get(f"{BASE_URL}{API_KEY}")
+        try:
+            response = requests.get(f"{BASE_URL}{API_KEY}", timeout=5)
+            response.raise_for_status()
+        except requests.exceptions.RequestException:
+            raise HTTPException(status_code=503, detail="Translink is not working at the moment") 
+        
         cached_feed = gtfs_realtime_pb2.FeedMessage()
         cached_feed.ParseFromString(response.content)
         cached_time = datetime.datetime.now().astimezone()
@@ -81,4 +86,5 @@ def check_rate_limit(ip: str, rate_limiter: dict[str, tuple[int, datetime.dateti
 # clean code 
 # start pytest/testing codes, its starting to get big
 
+        #try to understand this part a little bit better, i kind of dont understand how the protobuf works either, please at least get the gist of it
 
