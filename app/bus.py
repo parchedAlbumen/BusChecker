@@ -1,8 +1,6 @@
-from dotenv import load_dotenv
 from fastapi import HTTPException
 import datetime
 import csv
-import math
 
 def get_arrival(stop_code, feed, stops, directions, dict_names):
     stop = stops.get(stop_code)
@@ -16,9 +14,16 @@ def get_arrival(stop_code, feed, stops, directions, dict_names):
         "date": datetime.datetime.now().astimezone().strftime("%Y-%m-%d"),
         "buses": []
     }
-
+    
     for entity in feed.entity:
+        if entity.trip_update.trip.schedule_relationship not in (
+                entity.trip_update.trip.SCHEDULED,
+                entity.trip_update.trip.ADDED,
+            ):#for the whole bus trip
+            continue
         for stop_time in entity.trip_update.stop_time_update:
+            if stop_time.schedule_relationship != stop_time.SCHEDULED: #for the specific bus stop
+                continue
             if stop_time.stop_id == internal_code:
                 #testing here
                 route_id = entity.trip_update.trip.route_id
@@ -34,6 +39,7 @@ def get_arrival(stop_code, feed, stops, directions, dict_names):
                     "predicted_arrival": format_minutes(minutes),
                     "ending_destination": get_destination_name(route_short_name, direction_id, dict_names)
                 })
+                break #already found here
     return bus_infos
 
 def load_stops(filepath):
