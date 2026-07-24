@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request, HTTPException
 from dotenv import load_dotenv
 from google.transit import gtfs_realtime_pb2
 import app.bus as bus
-import datetime
+# import datetime
 import requests 
 import os
 import redis
