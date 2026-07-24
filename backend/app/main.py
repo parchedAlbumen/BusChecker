@@ -18,9 +18,6 @@ API_KEY = os.getenv("MY_API_KEY")
 #redis
 r = redis.Redis(host="localhost", port=6379) 
 
-# #for rate limiting
-# rate_limit : dict[str, tuple[int, datetime.datetime]] = {}
-
 app = FastAPI()
 
 @app.get("/")
