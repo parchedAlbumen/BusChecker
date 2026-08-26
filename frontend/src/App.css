@@ -182,3 +182,11 @@
     border-right-color: var(--border);
   }
 }
+
+.bus {
+  margin-bottom: 30px;
+}
+
+.stopInfo {
+  margin-bottom: 15px;
+}

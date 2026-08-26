@@ -1,122 +1,61 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useEffect, useState, useRef } from 'react'
+import "./App.css"
+
+type BusInfo = {
+    stop_code: string,
+    stop_name: string,
+    date: string
+    buses: {
+        time_12h: string, 
+        predicted_arrival: string,
+        ending_destination: string
+    }[]
+}
+
+async function getData(stopId: string) {
+  const response = await fetch(`http://localhost:8000/stops/${stopId}`)
+  const data = await response.json()  
+
+  return data 
+}
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [stopId, setStopId] = useState("")
+  const [busesInfo, setBusesInfo] = useState<BusInfo|null>(null)
+
+  async function handleSearch(stopId: string) {
+    const data = await getData(stopId)
+    setBusesInfo(data)
+    console.log(data.buses)
+  }
 
   return (
     <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+      <div> 
+        <input type="text" value={stopId} onChange={(e) => setStopId(e.target.value)} />
+        <button type="button" onClick={async () => handleSearch(stopId)}>check bus stop</button>
+      </div> 
 
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
+      {busesInfo !== null && (
+          <> 
+            <div className="stopInfo">
+              <p>Stop Code: {busesInfo.stop_code}</p>
+              <p>Stop Name: {busesInfo.stop_name}</p>
+              <p>date: {busesInfo.date}</p>
+            </div>
+              <p>bus(s) info:</p>
+              {
+                busesInfo.buses.map(bus => (
+                  <div className="bus">
+                      <p>Time: {bus.time_12h}</p>
+                      <p>Predicted Arrival: {bus.predicted_arrival}</p>
+                      <p>Ending Destination: {bus.ending_destination}</p>
+                  </div>
+                ))
+              }
+          </>
+        )
+      }
     </>
   )
-}
-
-export default App
+} export default App
