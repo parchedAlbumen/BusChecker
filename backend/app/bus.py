@@ -1,9 +1,11 @@
 from fastapi import HTTPException
 import datetime
+from google.protobuf.json_format import MessageToDict
 import csv
 
 def get_arrival(stop_code, feed, stops, directions, dict_names):
     stop = stops.get(stop_code)
+    
     internal_code = get_internal_id(stop)
     if internal_code is None:
         raise HTTPException(status_code=404, detail=f"Stop: {stop_code} does not exist")
@@ -68,16 +70,6 @@ def load_direction_names(filepath):
             direction_names[(row["direction_id"], row["route_name"])] = row["direction_name"]
     return direction_names
 
-# def load_routes(filepath):
-#     routes = []
-#     with open(filepath) as f:
-#         reader = csv.DictReader(f)
-#         for row in reader:
-#             routes[row["route_id"]] = {
-#                 "route_short_name": row["route_short_name"]
-#             }
-#     return routes
-
 def get_internal_id(stop):
     if stop is None:
         return None
@@ -103,3 +95,17 @@ def get_destination_name(route_short_name: str, direction_id, direction_names):
         return None
     name = route_short_name.lstrip("0") or route_short_name #if theres a leading 0, remove, else nothing happens
     return direction_names.get((str(direction_id), name))
+
+def get_raw_feed(stop_code, stops, feed):
+    result = {
+        "entities": []
+    }
+    stop = stops.get(stop_code)
+    internal_stop_code = get_internal_id(stop)
+    for entity in feed.entity:
+        for stop_time in entity.trip_update.stop_time_update:
+            if stop_time.stop_id == internal_stop_code:
+                converted = MessageToDict(entity)
+                result["entities"].append(converted)
+
+    return result

@@ -43,7 +43,7 @@ function App() {
               <p>Stop Name: {busesInfo.stop_name}</p>
               <p>date: {busesInfo.date}</p>
             </div>
-              <p>bus(s) info:</p>
+              <p>bus info(s) </p>
               {
                 busesInfo.buses.map(bus => (
                   <div className="bus">
