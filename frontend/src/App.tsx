@@ -6,6 +6,7 @@ type BusInfo = {
     stop_name: string,
     date: string
     buses: {
+        vehicle_id: string,
         time_12h: string, 
         predicted_arrival: string,
         ending_destination: string
@@ -15,7 +16,6 @@ type BusInfo = {
 async function getData(stopId: string) {
   const response = await fetch(`http://localhost:8000/stops/${stopId}`)
   const data = await response.json()  
-
   return data 
 }
 
@@ -26,14 +26,13 @@ function App() {
   async function handleSearch(stopId: string) {
     const data = await getData(stopId)
     setBusesInfo(data)
-    console.log(data.buses)
   }
 
   return (
     <>
       <div> 
         <input type="text" value={stopId} onChange={(e) => setStopId(e.target.value)} />
-        <button type="button" onClick={async () => handleSearch(stopId)}>check bus stop</button>
+        <button className="bg-blue-500 text-white px-4 py-2 rounded-lg" type="button" onClick={async () => handleSearch(stopId)}>check bus stop</button>
       </div> 
 
       {busesInfo !== null && (
@@ -46,14 +45,15 @@ function App() {
               <p>bus info(s) </p>
               {
                 busesInfo.buses.map(bus => (
-                  <div className="bus">
+                  <div className="bus" key={bus.vehicle_id}>
+                      <p>Bus Unique Id: {bus.vehicle_id}</p>
                       <p>Time: {bus.time_12h}</p>
                       <p>Predicted Arrival: {bus.predicted_arrival}</p>
                       <p>Ending Destination: {bus.ending_destination}</p>
                   </div>
                 ))
               }
-          </>
+          </> 
         )
       }
     </>
