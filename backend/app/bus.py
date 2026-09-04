@@ -36,6 +36,7 @@ def get_arrival(stop_code, feed, stops, directions, dict_names):
                 if minutes >= 50:
                     continue
                 bus_infos["buses"].append({
+                    "vehicle_id": entity.trip_update.vehicle.id,
                     "time_12h": bus_time.strftime("%I:%M %p"),
                     "predicted_arrival": format_minutes(minutes),
                     "ending_destination": get_destination_name(route_short_name, direction_id, dict_names)
